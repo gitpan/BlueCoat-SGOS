@@ -1,0 +1,20 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+examples/cpl.pl
+examples/inventory.pl
+examples/networkinfo.pl
+examples/sections.pl
+lib/BlueCoat/SGOS.pm
+t/000_load.t
+t/201_author_tests.t
+t/202_author_pod.t
+t/203_author_perl_critic.t
+t/204_author_pod_coverage.t
+t/205_author_pod_spell.t
+t/300_file_sysinfo.t
+t/sysinfos/4006060000_5.3.1.4__0.sysinfo
+t/sysinfos/public.parameters
+META.yml                                 Module meta-data (added by MakeMaker)
+SIGNATURE                                Public-key signature (added by MakeMaker)

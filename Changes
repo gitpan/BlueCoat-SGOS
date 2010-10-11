@@ -1,0 +1,33 @@
+Revision history for BlueCoat-SGOS
+
+0.45    04-29-2010 0347
+        First version, released on an unsuspecting world.
+
+0.46	04-29-2010 0404
+		Minor changes
+
+0.47	04-29-2010 0424
+		Code cleanup
+
+0.90	05-02-2010 1300
+		Minor fixes, speeling [sic] errors, more documentation
+
+0.91	05-05-2010 2255
+		Much better parsing of VPM-CPL and VPM-XML files.
+		Addition of vpmcpl() and vpmxml() methods to return respective
+			data.
+		Update documentation, particularly around the sections that can
+			retrieved directly (e.g. "Licensing Statistics" and many
+			others).
+		Better unit testing.
+		Updated example script now includes date/time of the sysinfo.
+
+0.92	05-06-2010
+		Added more author-only unit tests.  Now up to 5,730 tests.
+
+0.93	09-01-2010
+		Added more author-only tests.
+
+0.94	10-10-2010
+		Refactored into BlueCoat::SGOS
+

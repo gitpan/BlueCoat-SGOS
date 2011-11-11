@@ -17,9 +17,15 @@ else {
 }
 
 __DATA__
+AnnoCPAN
 bluecoat
+CPAN
+filename
 lange
 login
 sgos
+SGOS
+sysinfo
+VPM
 vpmcpl
 vpmxml

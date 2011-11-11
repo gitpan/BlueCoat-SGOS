@@ -37,7 +37,7 @@ foreach my $file (@files) {
 foreach (keys %testparams) {
 	my $sgosversion = $_;
 	my %data        = %{$testparams{$sgosversion}};
-	$totaltests = $totaltests + 3;
+	$totaltests = $totaltests + 4;
 	$totaltests = $totaltests + (keys %data);
 }
 
@@ -57,6 +57,9 @@ foreach (keys %testparams) {
 
 	# test 3 - is the size of the sysinfo greater than 10
 	ok(length($bc->{'_sgos_sysinfo'}) > 10, 'sysinfo size gt 10');
+
+	# test 4 - sysinfo version
+	like($bc->{'_sysinfoversion'}, qr/\d+\.\d+/, 'sysinfo version is ' . $bc->{'_sysinfoversion'} );
 
 	foreach (sort keys %data) {
 		my $k     = $_;

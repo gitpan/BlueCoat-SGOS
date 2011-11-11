@@ -31,3 +31,12 @@ Revision history for BlueCoat-SGOS
 0.94	10-10-2010
 		Refactored into BlueCoat::SGOS
 
+0.95	11-11-2011
+		Removed support and tests for SGOS 4.x.
+		Added a new get_sysinfo_from_data method to parse sysinfo that
+			already exists in a data structure.
+		Added an internal-only function to parse the last hardware
+			and software reboot times.
+		Parsing of the uptime is now also returned in seconds since
+			the epoch.
+

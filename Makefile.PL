@@ -17,10 +17,14 @@ WriteMakefile(
 	),
 	PL_FILES  => {},
 	PREREQ_PM => {
+		'Date::Parse'          => '0',
 		'Test::More'           => '0',
 		'LWP::UserAgent'       => '5.8.3.1',
 		'LWP::Protocol::https' => '0',
 	},
-	dist  => {COMPRESS => 'gzip -9f', SUFFIX => 'gz',},
-	clean => {FILES    => 'BlueCoat-SGOS-*'},
+	dist => {
+		COMPRESS => 'gzip -9f',
+		SUFFIX   => 'gz',
+	},
+	clean => {FILES => 'BlueCoat-SGOS-*'},
 );

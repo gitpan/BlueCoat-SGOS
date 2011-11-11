@@ -1,3 +1,4 @@
+4006060000_5.3.1.4__0.sysinfo;_sysinfoversion;7.0
 4006060000_5.3.1.4__0.sysinfo;appliance-name;proxy
 4006060000_5.3.1.4__0.sysinfo;modelnumber;200-B
 4006060000_5.3.1.4__0.sysinfo;serialnumber;4006060000
@@ -7,9 +8,19 @@
 4006060000_5.3.1.4__0.sysinfo;sysinfotime;Sat Mar 7, 2009 16:57:30 GMT
 4006060000_5.3.1.4__0.sysinfo;ip-default-gateway;172.16.1.1
 4006060000_5.3.1.4__0.sysinfo;sysinfo_type;sysinfo
+4006060000_5.3.1.4__0.sysinfo;hardware_reboot;21 hours, 45 minutes, and 21 seconds ago.
+4006060000_5.3.1.4__0.sysinfo;hardware_reboot_day;0
+4006060000_5.3.1.4__0.sysinfo;hardware_reboot_hour;21
+4006060000_5.3.1.4__0.sysinfo;hardware_reboot_minute;45
+4006060000_5.3.1.4__0.sysinfo;hardware_reboot_second;21
+4006060000_5.3.1.4__0.sysinfo;software_reboot;21 hours, 45 minutes, and 15 seconds ago.
+4006060000_5.3.1.4__0.sysinfo;software_reboot_day;0
+4006060000_5.3.1.4__0.sysinfo;software_reboot_hour;21
+4006060000_5.3.1.4__0.sysinfo;software_reboot_minute;45
+4006060000_5.3.1.4__0.sysinfo;software_reboot_second;15
 4006060000_5.3.1.4__0.sysinfo;length-vpm-xml;9558
 4006060000_5.3.1.4__0.sysinfo;length-vpm-cpl;3526
-4006060000_5.3.1.4__0.sysinfo;length-static-bypass;0
+4006060000_5.3.1.4__0.sysinfo;length-static-bypass;
 4006060000_5.3.1.4__0.sysinfo;int-0:0-mac;00:d0:83:04:ae:fc
 4006060000_5.3.1.4__0.sysinfo;int-0:0-capabilities;10/100
 4006060000_5.3.1.4__0.sysinfo;int-0:0-linkstatus;no link

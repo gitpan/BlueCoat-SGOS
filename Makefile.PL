@@ -20,6 +20,7 @@ WriteMakefile(
 		'Date::Parse'          => '0',
 		'Test::More'           => '0',
 		'LWP::UserAgent'       => '5.8.3.1',
+		'HTTP::Request'        => '6.00',
 		'LWP::Protocol::https' => '0',
 	},
 	dist => {

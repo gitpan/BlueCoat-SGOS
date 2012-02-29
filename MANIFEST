@@ -2,6 +2,7 @@ Changes
 MANIFEST
 Makefile.PL
 README
+examples/capture.pl
 examples/cpl.pl
 examples/inventory.pl
 examples/networkinfo.pl

@@ -6,7 +6,7 @@ formerly Net::BlueCoat::SGOS.
 
 
 ** WARNING 
-This is currently alpha-quality software.  This means:
+This is currently beta-quality software.  This means:
 + there could be bugs
 + the API is not stable
 
@@ -50,12 +50,11 @@ TODO
 There are many things to do:
 * Stabilize the API
 * Effectively extract the CPL and VPM-XML data
-* Allow interaction with a device over the network
 
 
 LICENSE AND COPYRIGHT
 
-Copyright (C) 2008-2011 Matthew Lange
+Copyright (C) 2008-2012 Matthew Lange
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published

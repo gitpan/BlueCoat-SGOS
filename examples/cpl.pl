@@ -9,6 +9,7 @@ my $bc = BlueCoat::SGOS->new('debuglevel' => 0,);
 my $file = $ARGV[0] || '../t/sysinfos/4006060000_5.3.1.4__0.sysinfo';
 
 $bc->get_sysinfo_from_file($file);
+$bc->parse_sysinfo();
 
 print "cpl=\n";
 print $bc->vpmcpl();

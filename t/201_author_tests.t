@@ -18,7 +18,7 @@ if (!defined($env_available)) {
 	plan skip_all => 'Author tests only.';
 }
 else {
-	plan tests => 8;
+	plan tests => 9;
 
 	# test 3 can create an object
 	my $bc = BlueCoat::SGOS->new(
@@ -31,23 +31,28 @@ else {
 	);
 	ok($bc, 'can create an object');
 
-	# test 4 log in
-	ok($bc->login(), 'log in to appliance');
+	# test 4 get sysinfo
+	ok($bc->get_sysinfo(), 'get sysinfo from appliance');
+	
+	# test 5 parse sysinfo
+	ok($bc->parse_sysinfo(), 'parse sysinfo');
+	
+	# test 6 sysinfo size gt 10
+	ok(length($bc->{'sgos_sysinfo'}) > 10);
 
-	# test 5 sysinfo size gt 10
-	my $sysinfosize = length($bc->{'_sgos_sysinfo'});
-	ok($sysinfosize > 10);
-
-	# Test 4
+	# Test 7 sgosversion looks normal
 	like($bc->{'sgosversion'}, qr/\d+\.\d+\.\d+\.\d+/);
 
-	# Test 5
+	# Test 8 sgosreleaseid looks normal
 	like($bc->{'sgosreleaseid'}, qr/\d+/);
 
+	# test 9 serialnumber looks normal
 	like($bc->{'serialnumber'}, qr/\d+/);
 
-	like($bc->{'modelnumber'}, qr/\d+/);
+	# model number exists (could be one of 200-10, 9000-5, VA-5, etc.)
+	ok($bc->{'modelnumber'});
 
+	# appliance-name exists
 	ok($bc->{'appliance-name'});
 }
 

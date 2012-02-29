@@ -40,3 +40,20 @@ Revision history for BlueCoat-SGOS
 		Parsing of the uptime is now also returned in seconds since
 			the epoch.
 
+1.00	02-28-2012
+		Updated methods to capture sysinfo data.  It is no longer necessary
+			to connect to the Blue Coat ProxySG to retrieve the realm name to
+			pass back to the LWP::UserAgent contructor.  Instead, the username
+			and password are passed directly to the initial connection to the
+			device.  This saves a round trip to the device.
+		Added a new method to send commands to the ProxySG.  It is name
+			send_command and takes a scalar containing commands to be run
+			on the ProxySG.
+		Updated the module to no longer automatically parse the sysinfo file.
+			This is necessary if you only want the sysinfo file.
+		Added a capture.pl example script to the examples directory.  This script
+			takes the sysinfo from a remote device and saves in on the local
+			filesystem with a timestamp.
+		Updated copyright.
+
+

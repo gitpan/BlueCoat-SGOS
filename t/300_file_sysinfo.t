@@ -37,7 +37,7 @@ foreach my $file (@files) {
 foreach (keys %testparams) {
 	my $sgosversion = $_;
 	my %data        = %{$testparams{$sgosversion}};
-	$totaltests = $totaltests + 4;
+	$totaltests = $totaltests + 5;
 	$totaltests = $totaltests + (keys %data);
 }
 
@@ -54,12 +54,16 @@ foreach (keys %testparams) {
 
 	# test 2 - can we get a sysinfo from file
 	ok($bc->get_sysinfo_from_file("sysinfos/$filename"), 'got sysinfo from file');
+	
+	# test 3 - parse sysinfo (returns 1 if ok)
+	ok($bc->parse_sysinfo());
 
-	# test 3 - is the size of the sysinfo greater than 10
-	ok(length($bc->{'_sgos_sysinfo'}) > 10, 'sysinfo size gt 10');
+	# test 4 - is the size of the sysinfo greater than 10
+	ok(length($bc->{'sgos_sysinfo'}) > 10, 'sysinfo size gt 10');
 
-	# test 4 - sysinfo version
+	# test 5 - sysinfo version
 	like($bc->{'_sysinfoversion'}, qr/\d+\.\d+/, 'sysinfo version is ' . $bc->{'_sysinfoversion'} );
+
 
 	foreach (sort keys %data) {
 		my $k     = $_;

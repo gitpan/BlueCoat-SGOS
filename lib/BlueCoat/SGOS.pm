@@ -4,11 +4,14 @@ no warnings;
 use Data::Dumper;
 use Date::Parse;
 use LWP::UserAgent;
+require HTTP::Request;
+use HTTP::Request::Common qw/POST/;
 
 our %_URL = (
 	'archconf_expanded'    => '/archconf_expanded.txt',
 	'contentfilter_status' => '/ContentFilter/Status',
 	'sysinfo'              => '/SYSINFO',
+	'send_command'         => '/Secure/Local/console/install_upload_action/cli_post_setup.txt'
 );
 
 our %defaults = (
@@ -26,18 +29,17 @@ BlueCoat::SGOS - A module to interact with Blue Coat SGOS-based devices.
 
 =head1 VERSION
 
-Version 0.95
+Version 1.00
 
 =cut
 
-our $VERSION = '0.95';
+our $VERSION = '1.00';
 
 =head1 SYNOPSIS
 
 This module interacts with Blue Coat SGOS-based devices.  Right
 now, this is limited to parsing of the 'sysinfo' data from the
 device.
-
 
 	use strict; #always!
 	use BlueCoat::SGOS;
@@ -47,16 +49,21 @@ device.
 		'applianceuser'		=> 'admin',
 		'appliancepassword'	=> 'password'
 	);
-	$bc->login();
+	$bc->get_sysinfo();
+	$bc->parse_sysinfo();
+
 	# or from a file
 	my $bc = BlueCoat::SGOS->new();
 	$bc->get_sysinfo_from_file('/path/to/file.sysinfo');
+	$bc->parse_sysinfo();
 
 	# or from a data structure
 	# in this case, $sysinfodata already contains sysinfo data
 	my $bc = BlueCoat::SGOS->new();
 	$bc->get_sysinfo_from_data($sysinfodata);
+	$bc->parse_sysinfo();
 
+	my $sysinfodata = $bc->{'sgos_sysinfo'};
 	my $sgosversion = $bc->{'sgosversion'};
 	my $sgosreleaseid = $bc->{'sgosreleaseid'};
 	my $serialnumber = $bc->{'serialnumber'};
@@ -68,7 +75,6 @@ device.
 
 	# Software configuration (i.e. show configuration)
 	my $swconfig = $bc->{'sgos_sysinfo_sect'}{'Software Configuration'};
-
 
 
 =head1 SUBROUTINES/METHODS
@@ -87,7 +93,6 @@ Creates a new BlueCoat::SGOS object.  Can be passed one of the following:
 	applianceconnectmode (one of http or https)
 	debuglevel
 
-
 =cut
 
 sub new {
@@ -96,13 +101,31 @@ sub new {
 	bless($self, $class);
 	my %args = (%defaults, @_);
 
-	$self->{'_appliancehost'}     = $args{'appliancehost'};
-	$self->{'_applianceport'}     = $args{'applianceport'};
-	$self->{'_applianceusername'} = $args{'applianceusername'};
-	$self->{'_appliancepassword'} = $args{'appliancepassword'};
-	$self->{'_connectmode'}       = $args{'applianceconnectmode'};
-	$self->{'_debuglevel'}        = $args{'debuglevel'};
+	$self->{'_appliancehost'}        = $args{'appliancehost'};
+	$self->{'_applianceport'}        = $args{'applianceport'};
+	$self->{'_applianceusername'}    = $args{'applianceusername'};
+	$self->{'_appliancepassword'}    = $args{'appliancepassword'};
+	$self->{'_applianceconnectmode'} = $args{'applianceconnectmode'};
+	$self->{'_debuglevel'}           = $args{'debuglevel'};
+	if (   $self->{'_appliancehost'}
+		&& $self->{'_applianceport'}
+		&& $self->{'_applianceconnectmode'}
+		&& $self->{'_applianceusername'}
+		&& $self->{'_appliancepassword'}) {
 
+		if ($self->{'_applianceconnectmode'} eq 'https') {
+			$self->{'_applianceurlbase'} = q#https://# . $self->{'_appliancehost'} . q#:# . $self->{'_applianceport'};
+		}
+		elsif ($self->{'_applianceconnectmode'} eq 'http') {
+			$self->{'_applianceurlbase'} = q#http://# . $self->{'_appliancehost'} . q#:# . $self->{'_applianceport'};
+		}
+	}
+
+	return $self;
+}
+
+sub _create_ua {
+	my $self = shift;
 	$self->{'_lwpua'} = LWP::UserAgent->new();
 	$self->{'_lwpua'}->agent("BlueCoat-SGOS/$VERSION");
 	$self->{'_lwpua'}->ssl_opts(
@@ -110,90 +133,45 @@ sub new {
 		'verify_hostname' => 0,
 	);
 
-	return $self;
 }
 
-=head2 login
+=head2 get_sysinfo
 
-Logs into the Blue Coat appliance using the parameters given when
-constructed.
+Takes no parameters, but instead fetches the sysinfo from the
+appliance specified in the constructor.
+
+	$bc->get_sysinfo();
 
 =cut
 
-sub login {
+sub get_sysinfo {
 	my $self = shift;
-	my %args = (%defaults, @_);
-	if (!$self->{'_appliancehost'}) {
-		$self->{'_appliancehost'} = $args{'appliancehost'};
-	}
-	if (!$self->{'_applianceport'}) {
-		$self->{'_applianceport'} = $args{'applianceport'};
-	}
-	if (!$self->{'_applianceusername'}) {
-		$self->{'_applianceusername'} = $args{'applianceusername'};
-	}
-	if (!$self->{'_appliancepassword'}) {
-		$self->{'_appliancepassword'} = $args{'appliancepassword'};
-	}
-	if (!$self->{'_applianceconnectmode'}) {
-		$self->{'_applianceconnectmode'} = $args{'applianceconnectmode'};
-	}
-	if (!$self->{'_debuglevel'}) {
-		$self->{'_debuglevel'} = $args{'debuglevel'};
-	}
 
-	if (   $self->{'_appliancehost'}
-		&& $self->{'_applianceport'}
-		&& $self->{'_applianceconnectmode'}
-		&& $self->{'_applianceusername'}
-		&& $self->{'_appliancepassword'}) {
-		if ($self->{'_applianceconnectmode'} eq 'https') {
-			$self->{'_applianceurlbase'} =
-			    q#https://#
-			  . $self->{'_appliancehost'} . q#:#
-			  . $self->{'_applianceport'};
-		}
-		elsif ($self->{'_applianceconnectmode'} eq 'http') {
-			$self->{'_applianceurlbase'} =
-			    q#http://#
-			  . $self->{'_appliancehost'} . q#:#
-			  . $self->{'_applianceport'};
-		}
-		$self->{'_lwpnetloc'} =
-		  $self->{'_appliancehost'} . q/:/ . $self->{'_applianceport'};
-
-		if ($self->{'_debuglevel'} > 0) {
-			print 'connecting to ' . $self->{'_applianceurlbase'} . "\n";
-			print 'lwpnetloc=' . $self->{'_lwpnetloc'} . "\n";
-		}
-		my $response = $self->{'_lwpua'}->get($self->{'_applianceurlbase'});
-
-		#print "response is " . Dumper($response) . "\n"; die;
-		my $rawrealm = $response->header('www-authenticate');
-		($self->{'_appliancerealm'}) = $rawrealm =~ m/realm=\"(.*)\"$/isx;
-		if ($self->{'_debuglevel'} > 0) {
-			print 'rawrealm=' . $rawrealm . "\n";
-			print 'appliancerealm=' . $self->{'_appliancerealm'} . "\n";
-			print 'applianceusername=' . $self->{'_applianceusername'} . "\n";
-			print 'appliancepassword=' . $self->{'_appliancepassword'} . "\n";
-			print "passed to credentials:\n";
-			print $self->{'_lwpnetloc'} . "\n";
-			print $self->{'_appliancerealm'} . "\n";
-			print $self->{'_applianceusername'} . "\n";
-			print $self->{'_appliancepassword'} . "\n";
-		}
-		$self->{'_lwpua'}->credentials(
-			$self->{'_lwpnetloc'},         $self->{'_appliancerealm'},
-			$self->{'_applianceusername'}, $self->{'_appliancepassword'}
-		);
-
+	if ($self->{'_debuglevel'} > 0) {
+		print 'URLBASE=' . $self->{'_applianceurlbase'} . "\n";
+		print 'Getting ' . $self->{'_applianceurlbase'} . $_URL{'sysinfo'} . "\n";
 	}
-	my $r = $self->_get_sysinfo();
-	if (!defined($r)) {
+	if (!defined($self->{'_lwpua'})) {
+		$self->_create_ua();
+	}
+	my $request = HTTP::Request->new('GET', $self->{'_applianceurlbase'} . $_URL{'sysinfo'});
+	$request->authorization_basic($self->{'_applianceusername'}, $self->{'_appliancepassword'});
+	my $response = $self->{'_lwpua'}->request($request);
+
+	if ($response->is_error) {
 		return undef;
 	}
 	else {
+		$self->{'sgos_sysinfo'} = $response->content;
+		if ($self->{'_debuglevel'} > 0) {
+			print 'status=' . $response->status_line . "\n";
+		}
+	}
+	if ($self->{'sgos_sysinfo'}) {
 		return 1;
+	}
+	else {
+		return undef;
 	}
 }
 
@@ -218,25 +196,12 @@ sub get_sysinfo_from_file {
 		# slurp
 		{
 			local $/ = undef;
-			$self->{'_sgos_sysinfo'} = <FSDFLKFJ>;
+			$self->{'sgos_sysinfo'} = <FSDFLKFJ>;
 		}
 		close FSDFLKFJ;
 
-		#$self->{'_sgos_sysinfo'} = `head -4000 "$filename"`;
-
-		if ($self->{'_sgos_sysinfo'}) {
-
-			# remove CR+LF
-			$self->{'_sgos_sysinfo'} =~ s/\r\n/\n/gi;
-			my $r = $self->_parse_sysinfo();
-			if ($r) {
-
-				# yes, if data
-				return 1;
-			}
-			else {
-				return undef;
-			}
+		if ($self->{'sgos_sysinfo'}) {
+			return 1;
 		}
 		else {
 			return undef;
@@ -247,7 +212,6 @@ sub get_sysinfo_from_file {
 		# no filename specified
 		return undef;
 	}
-
 }
 
 =head2 get_sysinfo_from_data
@@ -265,73 +229,30 @@ sub get_sysinfo_from_data {
 	if ($self->{'_debuglevel'} > 0) {
 		print "sub:get_sysinfo_from_data\n";
 	}
-	$self->{'_sgos_sysinfo'} = $data;
-	if ($self->{'_sgos_sysinfo'}) {
-
-		# remove CR+LF
-		$self->{'_sgos_sysinfo'} =~ s/\r\n/\n/gi;
-		my $r = $self->_parse_sysinfo();
-		if ($r) {
-
-			# yes, if data
-			return 1;
-		}
-		else {
-			return undef;
-		}
+	$self->{'sgos_sysinfo'} = $data;
+	if ($self->{'sgos_sysinfo'}) {
+		return 1;
 	}
 	else {
 		return undef;
 	}
 }
 
-sub _get_sysinfo {
+=head2 parse_sysinfo
+
+Takes no parameters.  Tells the object to parse the sysinfo
+data and populate the object variables.
+
+=cut
+
+sub parse_sysinfo {
 	my $self = shift;
 	if ($self->{'_debuglevel'} > 0) {
-		print 'Getting '
-		  . $self->{'_applianceurlbase'}
-		  . $_URL{'sysinfo'} . "\n";
+		print "parse_sysinfo\n";
 	}
-	my $r =
-	  $self->{'_lwpua'}->get($self->{'_applianceurlbase'} . $_URL{'sysinfo'});
-	if ($r->is_error) {
-		return undef;
-	}
-	else {
-		$self->{'_sgos_sysinfo'} = $r->content;
-		if ($self->{'_debuglevel'} > 0) {
-			print 'status=' . $r->status_line . "\n";
-
-			#print 'sysinfo=' . $r->content . "\n";
-		}
-	}
-	if ($self->{'_sgos_sysinfo'}) {
-
-		# remove CR+LF
-		$self->{'_sgos_sysinfo'} =~ s/\r\n/\n/gi;
-		my $r = $self->_parse_sysinfo();
-		if ($r) {
-			return 1;
-		}
-		else {
-			return undef;
-		}
-	}
-	else {
-		return undef;
-	}
-}
-
-sub _parse_sysinfo {
-	my $self = shift;
-	if ($self->{'_debuglevel'} > 0) {
-		print "_parse_sysinfo\n";
-	}
+	$self->{'sgos_sysinfo'} =~ s/\r\n/\n/gi;
 	my @split_sysinfo =
-	  split(
-/__________________________________________________________________________/,
-		$self->{'_sgos_sysinfo'}
-	  );
+	  split(/__________________________________________________________________________/, $self->{'sgos_sysinfo'});
 	$self->{'_sgos_sysinfo_split_count'} = $#split_sysinfo;
 
 	# init the % var
@@ -344,8 +265,7 @@ sub _parse_sysinfo {
 	# Version 6.0
 	# Version 6.1
 	# Version 7.0
-	($self->{'_sysinfoversion'}) =
-	  $self->{'sgos_sysinfo_sect'}{'_ReportInfo'} =~ m/Version (\d+\.\d+)/;
+	($self->{'_sysinfoversion'}) = $self->{'sgos_sysinfo_sect'}{'_ReportInfo'} =~ m/Version (\d+\.\d+)/;
 
 	# Loop through each section of the split sysinfo
 	foreach (1 .. $#split_sysinfo) {
@@ -444,10 +364,9 @@ sub _parse_appliance_name {
 		print "_parse_swconfig\n";
 	}
 	(undef, $self->{'appliance-name'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Software Configuration'} =~
-	  m/(appliance-name|hostname) (.+)$/im;
-	$self->{'appliance-name'} =~ s/^\"//;
-	$self->{'appliance-name'} =~ s/\"$//;
+	  $self->{'sgos_sysinfo_sect'}{'Software Configuration'} =~ m/(appliance-name|hostname) (.+)$/im;
+	$self->{'appliance-name'}                                =~ s/^\"//;
+	$self->{'appliance-name'}                                =~ s/\"$//;
 
 	if ($self->{'_debuglevel'} > 0) {
 		print "appliancename=$self->{'appliance-name'}\n";
@@ -461,8 +380,7 @@ sub _parse_model_number {
 	if ($self->{'_debuglevel'} > 0) {
 		print "_parse_model_number\n";
 	}
-	($self->{'modelnumber'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~ m/Model:\s(.+)/im;
+	($self->{'modelnumber'}) = $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~ m/Model:\s(.+)/im;
 }
 
 # get network
@@ -474,9 +392,7 @@ sub _parse_network {
 	if ($self->{'_debuglevel'} > 0) {
 		print "_parse_network\n";
 	}
-	my ($netinfo) =
-	  $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~
-	  m/Network:(.+)Accelerators/ism;
+	my ($netinfo) = $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~ m/Network:(.+)Accelerators/ism;
 	my @s = split(/\n/, $netinfo);
 	chomp @s;
 	foreach (@s) {
@@ -486,15 +402,13 @@ sub _parse_network {
 		my ($running)   = $line =~ m/running\sat\s(.+)\s\(MAC/im;
 		my $capabilities;
 
-#Interface 0:0: Intel Gigabit     running at 1 Gbps full duplex (MAC 00:e0:81:79:a5:1a)
-#Interface 2:0: Bypass 10/100/1000 with no link  (MAC 00:e0:ed:0b:67:e6)
+		#Interface 0:0: Intel Gigabit     running at 1 Gbps full duplex (MAC 00:e0:81:79:a5:1a)
+		#Interface 2:0: Bypass 10/100/1000 with no link  (MAC 00:e0:ed:0b:67:e6)
 		if ($line =~ m/running at/) {
-			($capabilities) =
-			  $line =~ m/Interface\s$interface\:\s\w+(.+)\s+running at/;
+			($capabilities) = $line =~ m/Interface\s$interface\:\s\w+(.+)\s+running at/;
 		}
 		if ($line =~ m/with no link/) {
-			($capabilities) =
-			  $line =~ m/Interface\s$interface\:\s\w+(.+)\s+with no link/;
+			($capabilities) = $line =~ m/Interface\s$interface\:\s\w+(.+)\s+with no link/;
 		}
 		if ($capabilities) {
 			$capabilities =~ s/\s+//ig;
@@ -539,14 +453,12 @@ sub _parse_network {
 		# sgos5, ip address and subnet mask are on SAME line
 		if ($line =~ m/ip-address/) {
 
-			($ip, $netmask) = $line =~
-m/^ip-address *(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) *(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})*/i;
+			($ip, $netmask) = $line =~ m/^ip-address *(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) *(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})*/i;
 			$ip      =~ s/\s+//gi;
 			$netmask =~ s/\s+//gi;
 		}
 		if ($line =~ m/subnet-mask/) {
-			($netmask) =
-			  $line =~ m/^subnet-mask *(.{1,3}\..{1,3}\..{1,3}\..{1,3})/i;
+			($netmask) = $line =~ m/^subnet-mask *(.{1,3}\..{1,3}\..{1,3}\..{1,3})/i;
 			$netmask =~ s/\s+//gi;
 		}
 
@@ -580,8 +492,7 @@ sub _parse_swconfig {
 			next;
 		}
 		else {
-			$self->{'sgos_swconfig_section'}{$sectionname} =
-			  $self->{'sgos_swconfig_section'}{$sectionname} . $line . "\n";
+			$self->{'sgos_swconfig_section'}{$sectionname} = $self->{'sgos_swconfig_section'}{$sectionname} . $line . "\n";
 		}
 
 	}
@@ -603,8 +514,7 @@ sub _parse_static_bypass {
 			}
 			else {
 				$line =~ s/^add //i;
-				$self->{'static-bypass'} =
-				  $self->{'static-bypass'} . $line . "\n";
+				$self->{'static-bypass'} = $self->{'static-bypass'} . $line . "\n";
 			}
 		}
 	}
@@ -619,8 +529,7 @@ sub _parse_vpm {
 
 	foreach my $line (@lines) {
 		if ($line =~ m/^inline policy vpm-cpl \"*end-(\d+)-inline\"*/) {
-			($have_vpm_cpl) =
-			  $line =~ m/^inline policy vpm-cpl \"*end-(\d+)-inline\"*/;
+			($have_vpm_cpl) = $line =~ m/^inline policy vpm-cpl \"*end-(\d+)-inline\"*/;
 		}
 		elsif ($have_vpm_cpl) {
 			if ($line =~ m/end-$have_vpm_cpl-inline/i) {
@@ -635,8 +544,7 @@ sub _parse_vpm {
 
 	foreach my $line (@lines) {
 		if ($line =~ m/^inline policy vpm-xml \"*end-(\d+)-inline\"*/) {
-			($have_vpm_xml) =
-			  $line =~ m/^inline policy vpm-xml \"*end-(\d+)-inline\"*/;
+			($have_vpm_xml) = $line =~ m/^inline policy vpm-xml \"*end-(\d+)-inline\"*/;
 		}
 		elsif ($have_vpm_xml) {
 			if ($line =~ m/end-$have_vpm_xml-inline/i) {
@@ -688,8 +596,7 @@ sub _parse_default_gateway {
 	}
 	foreach my $line (@s) {
 		if ($line =~ m/ip-default-gateway/) {
-			($self->{'ip-default-gateway'}) = $line =~
-			  m/^ip-default-gateway +(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+			($self->{'ip-default-gateway'}) = $line =~ m/^ip-default-gateway +(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
 		}
 	}
 
@@ -707,8 +614,7 @@ sub _parse_route_table {
 	#end-398382495-inline
 	my @r;
 	if ($self->{'sgos_sysinfo_sect'}{'TCP/IP Routing Table'}) {
-		$self->{'routetable'} =
-		  $self->{'sgos_sysinfo_sect'}{'TCP/IP Routing Table'};
+		$self->{'routetable'} = $self->{'sgos_sysinfo_sect'}{'TCP/IP Routing Table'};
 	}
 	else {
 		@r =
@@ -717,8 +623,7 @@ sub _parse_route_table {
 	my $marker;
 	foreach my $line (@r) {
 		if ($line =~ m/inline static-route-table \"end-\d+-inline\"/i) {
-			($marker) =
-			  $line =~ m/inline static-route-table \"end-(\d+)-inline\"/i;
+			($marker) = $line =~ m/inline static-route-table \"end-(\d+)-inline\"/i;
 		}
 		if ($line =~ m/end-$marker-inline/) {
 			$marker = undef;
@@ -730,8 +635,7 @@ sub _parse_route_table {
 			if ($line =~
 m/\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/
 			  ) {
-				$self->{'static-route-table'} =
-				  $self->{'static-route-table'} . $line . "\n";
+				$self->{'static-route-table'} = $self->{'static-route-table'} . $line . "\n";
 			}
 		}
 	}
@@ -743,9 +647,7 @@ sub _parse_serial_number {
 	if ($self->{'_debuglevel'} > 0) {
 		print "_parse_sgos_serial_number\n";
 	}
-	($self->{'serialnumber'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/Serial\snumber\sis\s(\d+)/isx;
+	($self->{'serialnumber'}) = $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/Serial\snumber\sis\s(\d+)/isx;
 }
 
 sub _parse_ssl_accelerator {
@@ -763,9 +665,7 @@ sub _parse_ssl_accelerator {
 	#  Internal: Cavium CN501 Security Processor
 	#  Internal: Broadcom 5825 Security Processor
 	#
-	my ($acceleratorinfo) =
-	  $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~
-	  m/(Accelerators\:.+)/ism;
+	my ($acceleratorinfo) = $self->{'sgos_sysinfo_sect'}{'Hardware Information'} =~ m/(Accelerators\:.+)/ism;
 	my @a = split(/\n/, $acceleratorinfo);
 
 	#print "There are $#a lines\n";
@@ -790,9 +690,7 @@ sub _parse_sysinfo_time {
 	if ($self->{'_debuglevel'} > 0) {
 		print "_parse_sysinfo_time\n";
 	}
-	($self->{'sysinfotime'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/^The current time is (.+) \(/im;
+	($self->{'sysinfotime'}) = $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/^The current time is (.+) \(/im;
 	$self->{'sysinfotime_epoch'} = str2time($self->{'sysinfotime'});
 }
 
@@ -802,28 +700,23 @@ sub _parse_reboot_time {
 		"_parse_reboot_time\n";
 	}
 
-# Calculate hardware reboot time
-# The ProxySG Appliance was last hardware rebooted 1 days, 5 hours, 55 minutes, and 0 seconds ago.
+	# Calculate hardware reboot time
+	# The ProxySG Appliance was last hardware rebooted 1 days, 5 hours, 55 minutes, and 0 seconds ago.
 	($self->{'hardware_reboot'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/The ProxySG Appliance was last hardware rebooted (.*)$/m;
-	($self->{'hardware_reboot_day'}) =
-	  $self->{'hardware_reboot'} =~ m/(\d+) day/;
+	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/The ProxySG Appliance was last hardware rebooted (.*)$/m;
+	($self->{'hardware_reboot_day'}) = $self->{'hardware_reboot'} =~ m/(\d+) day/;
 	if (!defined($self->{'hardware_reboot_day'})) {
 		$self->{'hardware_reboot_day'} = 0;
 	}
-	($self->{'hardware_reboot_hour'}) =
-	  $self->{'hardware_reboot'} =~ m/(\d+) hour/;
+	($self->{'hardware_reboot_hour'}) = $self->{'hardware_reboot'} =~ m/(\d+) hour/;
 	if (!defined($self->{'hardware_reboot_hour'})) {
 		$self->{'hardware_reboot_hour'} = 0;
 	}
-	($self->{'hardware_reboot_minute'}) =
-	  $self->{'hardware_reboot'} =~ m/(\d+) minute/;
+	($self->{'hardware_reboot_minute'}) = $self->{'hardware_reboot'} =~ m/(\d+) minute/;
 	if (!defined($self->{'hardware_reboot_minute'})) {
 		$self->{'hardware_reboot_minute'} = 0;
 	}
-	($self->{'hardware_reboot_second'}) =
-	  $self->{'hardware_reboot'} =~ m/(\d+) second/;
+	($self->{'hardware_reboot_second'}) = $self->{'hardware_reboot'} =~ m/(\d+) second/;
 	if (!defined($self->{'hardware_reboot_second'})) {
 		$self->{'hardware_reboot_second'} = 0;
 	}
@@ -833,28 +726,23 @@ sub _parse_reboot_time {
 	  ($self->{'hardware_reboot_minute'} * 60) +
 	  $self->{'hardware_reboot_second'};
 
-# The ProxySG Appliance was last software rebooted 1 days, 5 hours, 55 minutes, and 1 seconds ago.
+	# The ProxySG Appliance was last software rebooted 1 days, 5 hours, 55 minutes, and 1 seconds ago.
 
 	($self->{'software_reboot'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/The ProxySG Appliance was last software rebooted (.*)$/m;
-	($self->{'software_reboot_day'}) =
-	  $self->{'software_reboot'} =~ m/(\d+) day/;
+	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/The ProxySG Appliance was last software rebooted (.*)$/m;
+	($self->{'software_reboot_day'}) = $self->{'software_reboot'} =~ m/(\d+) day/;
 	if (!defined($self->{'software_reboot_day'})) {
 		$self->{'software_reboot_day'} = 0;
 	}
-	($self->{'software_reboot_hour'}) =
-	  $self->{'software_reboot'} =~ m/(\d+) hour/;
+	($self->{'software_reboot_hour'}) = $self->{'software_reboot'} =~ m/(\d+) hour/;
 	if (!defined($self->{'software_reboot_hour'})) {
 		$self->{'software_reboot_hour'} = 0;
 	}
-	($self->{'software_reboot_minute'}) =
-	  $self->{'software_reboot'} =~ m/(\d+) minute/;
+	($self->{'software_reboot_minute'}) = $self->{'software_reboot'} =~ m/(\d+) minute/;
 	if (!defined($self->{'software_reboot_minute'})) {
 		$self->{'software_reboot_minute'} = 0;
 	}
-	($self->{'software_reboot_second'}) =
-	  $self->{'software_reboot'} =~ m/(\d+) second/;
+	($self->{'software_reboot_second'}) = $self->{'software_reboot'} =~ m/(\d+) second/;
 	if (!defined($self->{'software_reboot_second'})) {
 		$self->{'software_reboot_second'} = 0;
 	}
@@ -873,9 +761,7 @@ sub _parse_sgos_releaseid {
 
 	# parse  SGOS version, SGOS releaseid, and serial number
 	# SGOS release ID
-	($self->{'sgosreleaseid'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/Release\sid:\s(\d+)/isx;
+	($self->{'sgosreleaseid'}) = $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/Release\sid:\s(\d+)/isx;
 }
 
 sub _parse_sgos_version {
@@ -896,12 +782,51 @@ sub _parse_sgos_version {
 	# Blue Coat Systems, Inc., ProxySG Appliance Version Information
 	# Version: SGOS 4.2.10.1
 	#
-	($self->{'sgosversion'}) =
-	  $self->{'sgos_sysinfo_sect'}{'Version Information'} =~
-	  m/Version:\sSGOS\s(\d+\.\d+\.\d+\.\d+)/im;
+	($self->{'sgosversion'}) = $self->{'sgos_sysinfo_sect'}{'Version Information'} =~ m/Version:\sSGOS\s(\d+\.\d+\.\d+\.\d+)/im;
 	if ($self->{'_debuglevel'} > 0) {
 		print "SGOS version = $self->{'sgosversion'}\n";
 	}
+}
+
+=head2 send_command
+
+Takes one parameter: a scalar that contains commands to send to the appliance.
+
+	my $output = $bc->send_command('show version');
+	# or
+	my $commands =qq{
+		conf t
+		int 0:0
+		speed 100
+	};
+	my $output = $bc->send_command($commands);
+
+=cut
+
+sub send_command {
+	my $self    = shift;
+	my $command = shift;
+	if ($self->{'_debuglevel'} > 0) {
+		print "begin sub:send_command\n";
+		print "command=$command\n";
+	}
+	if (!defined($self->{'_lwpua'})) {
+		$self->_create_ua();
+	}
+	my $request = POST $self->{'_applianceurlbase'} . $_URL{'send_command'},
+	  Content_Type => 'form-data',
+	  'Content'    => ['file' => $command];
+	$request->authorization_basic($self->{'_applianceusername'}, $self->{'_appliancepassword'});
+	my $response = $self->{'_lwpua'}->request($request);
+	my $content;
+	if ($response->is_success) {
+		$content = $response->content;
+	}
+	else {
+		die 'error';
+	}
+	$content =~ s/\r//ig;
+	return $content;
 }
 
 =head2 Other Data
@@ -1090,7 +1015,7 @@ L<http://search.cpan.org/dist/BlueCoat-SGOS/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2008-2011 Matthew Lange.
+Copyright (C) 2008-2012 Matthew Lange
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published

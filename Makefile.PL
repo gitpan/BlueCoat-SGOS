@@ -10,6 +10,7 @@ WriteMakefile(
 	AUTHOR        => q{Matthew Lange <mmlange@cpan.org>},
 	VERSION_FROM  => 'lib/BlueCoat/SGOS.pm',
 	ABSTRACT_FROM => 'lib/BlueCoat/SGOS.pm',
+	MIN_PERL_VERSION	=>	'5.6.0',
 	(
 		$ExtUtils::MakeMaker::VERSION >= 6.3002
 		? ('LICENSE' => 'gpl')
@@ -19,7 +20,7 @@ WriteMakefile(
 	PREREQ_PM => {
 		'Date::Parse'          => '0',
 		'Test::More'           => '0',
-		'LWP::UserAgent'       => '5.8.3.1',
+		'LWP::UserAgent'       => '6.00',  # requires ssl_opts
 		'HTTP::Request'        => '6.00',
 		'LWP::Protocol::https' => '0',
 	},

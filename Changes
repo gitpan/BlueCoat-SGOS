@@ -43,7 +43,7 @@ Revision history for BlueCoat-SGOS
 1.00	02-28-2012
 		Updated methods to capture sysinfo data.  It is no longer necessary
 			to connect to the Blue Coat ProxySG to retrieve the realm name to
-			pass back to the LWP::UserAgent contructor.  Instead, the username
+			pass back to the LWP::UserAgent constructor.  Instead, the username
 			and password are passed directly to the initial connection to the
 			device.  This saves a round trip to the device.
 		Added a new method to send commands to the ProxySG.  It is name
@@ -56,4 +56,9 @@ Revision history for BlueCoat-SGOS
 			filesystem with a timestamp.
 		Updated copyright.
 
+1.01	07-09-2012 1922
+		Added the ability to use Build.PL to install the distribution, to be
+		    more friendly for non-Unix systems.
+		Updated copyright to be GPL v2 only.
+		Testing is now more aggressive.
 

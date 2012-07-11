@@ -1,19 +1,36 @@
-#perl
+#!perl -w
 #
 #
 #
+# can't use taint mode here because Test::Spelling doesn't like it
+use warnings;
 use Test::More;
+use Test::NoWarnings;
 
-if ($ENV{'AUTHOR_TESTING'} ) {
+if ($ENV{'AUTHOR_TESTING'}) {
 	eval "use Test::Spelling";
-	plan skip_all => "Test::Spelling not found" if $@;
-
-	set_spell_cmd('aspell list');
+	if ($@) {
+		plan tests => 1;
+		diag("Skipping tests.  Test::Spelling not found.");
+		exit 0;
+	}
+	set_spell_cmd('/usr/bin/aspell list');
 	add_stopwords(<DATA>);
-	all_pod_files_spelling_ok();
+
+	my @files           = all_pod_files('lib');
+	my $number_of_files = $#files + 1;
+	plan tests => $number_of_files + 1;
+	foreach my $file (@files) {
+		note("begin $file");
+
+		#pod_file_spelling_ok($file, "spelling for $file");
+		pod_file_spelling_ok($file);
+		note("end $file");
+	}
 }
 else {
-	plan skip_all => 'Author tests only.';
+	plan tests => 1;
+	diag('Author tests only.');
 }
 
 __DATA__
@@ -21,7 +38,7 @@ AnnoCPAN
 bluecoat
 CPAN
 filename
-lange
+Lange
 login
 sgos
 SGOS
@@ -29,3 +46,4 @@ sysinfo
 VPM
 vpmcpl
 vpmxml
+

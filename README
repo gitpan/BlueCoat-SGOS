@@ -13,15 +13,28 @@ This is currently beta-quality software.  This means:
 It has been tested on a handful of sysinfo files with great
 success.
 
+Because sysinfo data is semi-unstructured, this module
+reads everything into memory and splits it apart
+at each "delimiter" section.  This is inefficient
+and slow.
+
 
 INSTALLATION
 
 To install this module, run the following commands:
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+   -- OR --
+
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
+
 
 SUPPORT AND DOCUMENTATION
 

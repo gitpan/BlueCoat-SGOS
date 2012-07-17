@@ -13,7 +13,7 @@ my %c = (
 	'applianceport'     => 8082,
 	'applianceusername' => 'admin',
 	'appliancepassword' => '',
-	'command'			=>	'sho ver',
+	'command'			=>	"exit\nsho ver",  # remember, we start out in config mode
 );
 
 my $d = GetOptions(

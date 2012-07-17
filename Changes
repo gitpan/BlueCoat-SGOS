@@ -62,3 +62,8 @@ Revision history for BlueCoat-SGOS
 		Updated copyright to be GPL v2 only.
 		Testing is now more aggressive.
 
+1.02	07-15-2012 2021
+		Updated documentation for send_command.  You're already in configuration mode,
+			so it's not necessary to use 'conf t' before running commands.
+		Updated prerequisite build modules (Test::NoWarnings).
+

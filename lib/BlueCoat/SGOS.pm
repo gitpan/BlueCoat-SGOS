@@ -42,11 +42,11 @@ BlueCoat::SGOS - A module to interact with Blue Coat SGOS-based devices.
 
 =head1 VERSION
 
-Version 1.01
+Version 1.02
 
 =cut
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 =head1 SYNOPSIS
 
@@ -891,12 +891,12 @@ sub _parse_sgos_version {
 
 =head2 send_command
 
-Takes one parameter: a scalar that contains commands to send to the appliance.
+Takes one parameter: a scalar that contains configuration commands to send to the appliance.
+This command is executed in configuration mode.
 
 	my $output = $bc->send_command('show version');
 	# or
 	my $commands =qq{
-		conf t
 		int 0:0
 		speed 100
 	};

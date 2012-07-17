@@ -14,12 +14,6 @@ META.json
 META.yml
 README
 t/000_load.t
-t/201_author_tests.t
-t/202_author_pod.t
-t/203_author_perlcritic.t
-t/204_author_pod_coverage.t
-t/205_author_pod_spell.t
-t/222_kwalitee.t
 t/300_file_sysinfo.t
 t/sysinfos/4006060000_5.3.1.4__0.sysinfo
 t/sysinfos/public.parameters

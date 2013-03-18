@@ -23,30 +23,17 @@ our %defaults = (
 	'debuglevel'           => 0,
 );
 
-our %map = (
-	'HTTP_MAIN_0015' => 'HTTP 0.9 requests received',
-	'HTTP_MAIN_0010' => 'HTTP 1.0 requests received',
-	'HTTP_MAIN_0011' => 'HTTP 1.1 requests received',
-	'HTTP_MAIN_0016' => 'HTTP 0.9 responses received',
-	'HTTP_MAIN_0012' => 'HTTP 1.0 responses received',
-	'HTTP_MAIN_0013' => 'HTTP 1.1 responses received',
-	'HTTP_MAIN_0014' => 'Transparent requests received',
-	'HTTP_MAIN_0018' => 'HTTPS requests received',
-	'HTTP_MAIN_0019' => 'HTTPS responses received',
-	'HTTP_MAIN_0017' => 'NULL requests received',
-);
-
 =head1 NAME
 
 BlueCoat::SGOS - A module to interact with Blue Coat SGOS-based devices.
 
 =head1 VERSION
 
-Version 1.02
+Version 1.04
 
 =cut
 
-our $VERSION = '1.02';
+our $VERSION = '1.04';
 
 =head1 SYNOPSIS
 
@@ -507,11 +494,13 @@ sub _parse_network {
 			$netmask =~ s/\s+//gi;
 		}
 
-		if (length($interface) > 1 && $ip && $netmask) {
+		if (defined($interface) ) {
+			if (length($interface) > 1 && $ip && $netmask) {
 			$self->{'interface'}{$interface}{'ip'}      = $ip;
 			$self->{'interface'}{$interface}{'netmask'} = $netmask;
 			$interface                                  = undef;
 			$ip                                         = undef;
+		}
 		}
 
 	}

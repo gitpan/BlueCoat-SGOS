@@ -1,8 +1,8 @@
-#!/usr/bin/perl -wT
+#!perl -T
+#
 #
 #
 use strict;
-use warnings;
 use BlueCoat::SGOS;
 use Test::More;
 
@@ -11,7 +11,7 @@ use Test::More;
 BEGIN {chdir 't' if -d 't'}
 
 my %testparams;
-my $osregex = $ARGV[0];
+my $regex = $ARGV[0];
 
 opendir(D, "sysinfos/");
 my @files = readdir(D);
@@ -26,8 +26,8 @@ foreach my $file (@files) {
 			chomp($line);
 			my @s = split(/;/, $line);
 			if ($#s < 1) {next}
-			if ($osregex) {
-				if ($s[0] !~ /$osregex/) {next}
+			if ($regex) {
+				if ($s[0] !~ /$regex/) {next}
 			}
 			$testparams{$s[0]}{$s[1]} = $s[2];
 		}
@@ -37,8 +37,6 @@ foreach my $file (@files) {
 
 $totaltests = keys %testparams;
 
-#$totaltests = $totaltests + 1;
-
 # +1 for warnings
 plan tests => $totaltests;
 
@@ -46,7 +44,7 @@ foreach (keys %testparams) {
 	my $filename = $_;
 	my %data     = %{$testparams{$filename}};
 	my $subtests = keys %data;
-	$subtests = $subtests + 5;
+	$subtests = $subtests + 4;
 	note("subtests=$subtests");
 	subtest "For $filename" => sub {
 		plan tests => $subtests;
@@ -64,9 +62,6 @@ foreach (keys %testparams) {
 
 		# test 4 - is the size of the sysinfo greater than 10
 		ok(length($bc->{'sgos_sysinfo'}) > 10, "file=$filename, sysinfo size gt 10");
-
-		# test 5 - sysinfo version
-		like($bc->{'_sysinfoversion'}, qr/\d+\.\d+/, "file=$filename, sysinfo version is $bc->{'_sysinfoversion'}");
 
 		foreach (sort keys %data) {
 			my $k     = $_;

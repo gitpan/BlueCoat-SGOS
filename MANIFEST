@@ -15,6 +15,6 @@ META.yml
 README
 t/000_load.t
 t/300_file_sysinfo.t
-t/sysinfos/4006060000_5.3.1.4__0.sysinfo
+t/sysinfos/ProxySG-4006060000--20090307-165730UTC.sysinfo
 t/sysinfos/public.parameters
 SIGNATURE                                Public-key signature (added by MakeMaker)

@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.68.
+signed via the Module::Signature module, version 0.69.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,38 +15,38 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 3ebcedce7cd0a6285268e4e33aeb12cf6dc5aa65 Build.PL
-SHA1 84cc177e5e47f59b51bd66ff872b8ade84f58f52 Changes
-SHA1 85933a28b673d0fb60c9ecce41474c5f1879b4be LICENSE
-SHA1 64f7bfaa337407f3142709c12c8c34f472e75ade MANIFEST
-SHA1 9c27606a771e627dceca77f4b211bbd4c2b8bf78 META.json
-SHA1 4d70547e02512f872c6ba8a3b77d408b783f9ffb META.yml
-SHA1 f205227e4ef6b92b5a14f0bc61cb773082d7da47 Makefile.PL
-SHA1 f5a34f5fb29ec7ddd02ff311528f2a0b8006ef98 README
+SHA1 660581eb604185085c7d471b144f634ec5831879 Changes
+SHA1 b42003d361f328a3c78e72e7a71e1736f8cc901b LICENSE
+SHA1 9ee44c699f81d2eda3e1d597f8c8cbe13354154a MANIFEST
+SHA1 18f163e47933fc3ccd84c65196806fa8b98fd016 META.json
+SHA1 ed40ade84d4eb95977341173d905efd8fcfeefb8 META.yml
+SHA1 35ddb328279680b1b3962a434d0abe6f57b85a25 Makefile.PL
+SHA1 87a9d9e987f456eed5e6f7200df134b7dd0a8d98 README
 SHA1 b03b472ff0fb47b1c2ef3959971ed4724fc2b804 examples/cmd.pl
 SHA1 07697727ad90a80213f62566566fd6e7a26cc33b examples/cpl.pl
 SHA1 66c4b1b21790557bc33b0b34aed40f63053aab31 examples/inventory.pl
 SHA1 77cd52179eda663ef933ab1570640b0d07fb72a1 examples/networkinfo.pl
 SHA1 814be2e3311d77e1c9eaf0de5e3a6c3d8a67ae96 examples/sections.pl
 SHA1 a7ca44c77629c9df75c7dbf0d6dbac4893afe203 examples/sysinfo-capture.pl
-SHA1 0ba0e8aed73e67056735e6f223a72ed0c8fa1333 lib/BlueCoat/SGOS.pm
-SHA1 9bfe09ce88e8834205e028d218cf812690c1a5e4 t/000_load.t
-SHA1 b4fbf1763dcf8dec2adcfe18128a0b04ca7ec0e6 t/300_file_sysinfo.t
-SHA1 2048864976b4ea3d5004e505bb48c48a6b7e27c3 t/sysinfos/4006060000_5.3.1.4__0.sysinfo
-SHA1 2c55757aff162033633df6c8b98487fe8558a6d5 t/sysinfos/public.parameters
+SHA1 e85b794c6888b80bbadc6aeaaf6197920404a7d6 lib/BlueCoat/SGOS.pm
+SHA1 3ab5c65f855964dc9f7990fdec6019bc9ebface9 t/000_load.t
+SHA1 e69dbefbef3ae10426af1ca8ab95acbb15bd3ac2 t/300_file_sysinfo.t
+SHA1 995fab11dcf7b9b99584438783c8378bce4fa234 t/sysinfos/ProxySG-4006060000--20090307-165730UTC.sysinfo
+SHA1 defc765414a0996fa87b0eb23ce8588d9a6e10ad t/sysinfos/public.parameters
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
+Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJQBL+SAAoJEL4hzQbZYh1qu6MP/37fjCIPwj1dAPSxPFZCq2iu
-QQpB33nxxz8x8n2WLmoKCPU1sxiLaheb/zr8H5zFM+qpJ5cgluk1INcpUfkxPpTf
-xoqi6MJzSEx1TqYrlvslW+dlbgTWb2iHh3l6Tw1kr9Kvndqt6ylEgHvJkvsbD9Uy
-Z5GT5QZBLYVZJLifzzsmZnhDXqFe9h0z6mD42qptLwGSIVndfW/T1KgHEs8AK4te
-DVzbAkPf8u0h0ticJxIDgw12i1qN3O6nnaY6qFzpMp89KQb428QVjyiBtw1vVMdj
-0vXemQnKL1RmSTe5/HnSAoZo0Zc49KA+O7/rZXmw9T7o2ZIO2dIfsgpuJnGuYzle
-VL9MhsL+Tv68LMe/MfFBQwq96i/IErsO7jgi3O4NnYDUIIDB7hCtxC+mCVby7ZMm
-PT0ApAOqcBOPx1DqxAZDN+gddI/M/3WbgsDhVisZl9s219vW40rQt54zJJ/iIi29
-npmUMUJJAAFkY6OpUOxUDBTL/Gl9hb8Cfb3lDZXEP6uXOU1n6DEHBBkU+Y9HGiay
-/AhKkkffp9NR0ZFUhKz2o0w9vnRuclpyL1i4dg74gt8EOtSEQm4l8xtXlvCuCp+B
-KlOeeik5BDrWTJQ7yfobT0unAQ4zL81kToKm9t0qDJKHNsdgxt6g3odKX5vSSwIG
-yvkhp7Pj05OULxBL7W99
-=42Gu
+iQIcBAEBAgAGBQJRR0oCAAoJEL4hzQbZYh1qTQQP/ijs046XfYeXcUFnoe8QY1jm
+eZ+hhhgfNopA23BS/Q7zMg2DmUm2WmCMzGiM5n7ssuuhoHLW6Zkt8vClHSU73MxJ
+AuMuostL9VpA0M4/foXsV1nDdrmDYUg+OVuIfprAXlT8fzMVTyrkLzbKoLL4Jjht
+48M4rPfALsBOayLha9BCsaitF0sb0RPk33eDRAM1ED0ANUkVn3Z0K6WuGhx/30Re
++5b0ZOKvnSUhM9n5gGQiKg1kcazqj0qTpewvnt3/icB2guZBssH8mGJJm/J5TKtC
+H96BEpKn/dJuungfQ/7UT0HIrN4c19hiTWv7W3sGyzP9X41dSyZk3fVtZ+mnFdRf
+y2zzHlOydZl+A8bqPI+AHzshRdrBr0P8jnpyaXGhq02oozoeu1/mR/lMsXQbXXvl
+hq3na2SIJ21QZgCoxO5CM1GshAw4QCuxS6w2qb7CJRiUsKCT5d42FJO9lM8+N9mS
+iW1l5iMC/ObsmVhX05xPAmv6PP5vO0m8ChF22a2fI/fonmLJ2rFrZtdUp+oI6miq
+Ef+jLd4AOFwu1eXqFyp4AK76kzvau8ChcHUcCLpRgLQgo2SUqSm9MqemP6ldTpNr
+j4rryldk+XX3H4hM18FUlcQ6z6WKeHj6+15VZTu3ZK32b/eeXxt2IVHXouzgnUJB
+6nre6aD0NdbSPlZK0T5M
+=XZc8
 -----END PGP SIGNATURE-----

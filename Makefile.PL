@@ -13,7 +13,7 @@ WriteMakefile(
 	MIN_PERL_VERSION => '5.6.0',
 	(
 		$ExtUtils::MakeMaker::VERSION >= 6.3002
-		? ('LICENSE' => 'gpl')
+		? ('LICENSE' => 'GPL_2')
 		: ()
 	),
 	PL_FILES  => {},

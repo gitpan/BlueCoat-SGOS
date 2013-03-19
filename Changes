@@ -89,3 +89,10 @@ Revision history for BlueCoat::SGOS
 + Updated interface parsing to be less noisy.
 + Renamed test files.
 
+1.05    2013-03-18 18:02
+------------------------
++ Squashed bug 78469: fix returns with undef.
++ Squashed bug 78470: fix file open issues.
++ Squashed bug 78418: fix licensing in makefiles.
++ Changed tests to use TEST_AUTHOR environment variable.
+

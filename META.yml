@@ -25,4 +25,4 @@ requires:
   LWP::UserAgent: 6.00
   Test::More: 0
   perl: 5.006000
-version: 1.04
+version: 1.05
